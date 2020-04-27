@@ -1,0 +1,26 @@
+@borderColor: #999;
+@toolkitBg: #ffffff;
+
+.wrapper {
+  padding: 20px;
+  height: 100%;
+
+  .studio {
+    height: 100%;
+    border: 1px solid @borderColor;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    .toolkit {
+      flex: 0 0 46px;
+      border-bottom: 1px solid @borderColor;
+      padding: 8px 0;
+      background: @toolkitBg;
+    }
+    .chartCanvas {
+      flex: 1 1 auto;
+    }
+  }
+}

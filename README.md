@@ -1,2 +1,15 @@
-# editale-stock-chart
-可编辑的关系图（股权架构图）
+# umi project
+
+## Getting Started
+
+Install dependencies,
+
+```bash
+$ yarn
+```
+
+Start the dev server,
+
+```bash
+$ yarn start
+```
