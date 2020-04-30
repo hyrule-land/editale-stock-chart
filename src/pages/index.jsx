@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import G6 from '@antv/g6';
+import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
 
 const initialData = {
@@ -12,10 +13,20 @@ const initialData = {
 
 let graph = null;
 
+const commands = ['enter', 'delete'];
+
 export default () => {
   const canvasRef = useRef(null);
 
   const [data, setData] = useState(initialData);
+  // 当前是否在 canvas 工作区内
+  const [studioFocus, setStudioFocus] = useState(false);
+
+  useKeyPress(['shift.c'], event => {
+    if (studioFocus) {
+      console.log(event);
+    }
+  });
 
   // 绑定事件
   function bindEvents() {
@@ -49,7 +60,6 @@ export default () => {
 
   useEffect(() => {
     const canvasDom = canvasRef.current;
-    debugger;
 
     const grid = new G6.Grid({
       //... configurations
@@ -114,14 +124,26 @@ export default () => {
     bindEvents();
   }, []);
 
+  function onStudioMouseEnter() {
+    setStudioFocus(true);
+  }
+
+  function onStudioMouseLeave() {
+    setStudioFocus(false);
+  }
+
   return (
     <div className={styles.wrapper}>
-      <div className={styles.studio}>
-        <div className={styles.toolkit}>
+      <div
+        className={styles.studio}
+        onMouseEnter={onStudioMouseEnter}
+        onMouseLeave={onStudioMouseLeave}
+      >
+        <div className={styles.toolbar}>
           <span>撤销</span>
           <span>重做</span>
         </div>
-        <div className={styles.chartCanvas} ref={canvasRef}></div>
+        <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
       </div>
     </div>
   );
