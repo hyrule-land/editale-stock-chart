@@ -2,14 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import G6 from '@antv/g6';
 import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
-
-const initialData = {
-  id: '9f7f4a3f-9590-427b-afcf-8eaf8494e06e',
-  name:
-    '招商银行股份有限公司招商银行股份有限公司招商银行股份有限公司招商银行股份有限公司',
-  nodeType: 'root',
-  nsrsbh: '9144030010001686XA',
-};
+import initialData from './data';
 
 let graph = null;
 
@@ -71,7 +64,17 @@ export default () => {
       width: canvasDom.offsetWidth,
       height: canvasDom.offsetHeight,
       modes: {
-        default: ['drag-canvas', 'zoom-canvas', 'click-select'],
+        default: [
+          'drag-canvas',
+          'zoom-canvas',
+          'click-select',
+          'activate-relations',
+          'brush-select',
+          {
+            type: 'drag-node',
+            enableDelegate: true,
+          },
+        ],
         edit: ['click-select'],
       },
       defaultNode: {
