@@ -13,10 +13,6 @@ export default defineConfig({
           path: '/',
           component: '@/pages/index',
         },
-        {
-          path: '/puppeteer',
-          component: '@/pages/puppeteer/index',
-        },
       ],
     },
   ],
