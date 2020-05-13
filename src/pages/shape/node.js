@@ -16,7 +16,7 @@ G6.registerNode(
       },
     },
     draw(cfg, group) {
-      const { name } = cfg;
+      const { name, id } = cfg;
       let rectConfig = {
         width: 180,
         height: 30,
@@ -53,6 +53,21 @@ G6.registerNode(
       group.addShape('text', {
         attrs: {
           ...textConfig,
+        },
+      });
+
+      // 显示 id 方便调试
+      group.addShape('text', {
+        attrs: {
+          textAlign: 'center',
+          textBaseline: 'bottom',
+          x: 85,
+          y: -10,
+          text: id,
+          fontSize: 14,
+          fill: '#000',
+          cursor: 'pointer',
+          isNodeShape: true,
         },
       });
 

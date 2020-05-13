@@ -5,21 +5,20 @@ import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
 import initialData from './data';
 import { isArrayAndNotEmpty } from './util/uilt';
+import { v4 as uuidv4 } from 'uuid';
 
 // shape
 import './shape/node';
+import anchorPoints from './shape/anchorPoints';
 
 // behavior
 import './behavior/clickSelected';
 
+// util
+
 let graph = null;
 
 const commands = ['enter', 'delete'];
-
-const anchorPoints = [
-  [0, 0.5],
-  [1, 0.5],
-];
 
 export default () => {
   const canvasRef = useRef(null);
@@ -28,130 +27,59 @@ export default () => {
   // 当前是否在 canvas 工作区内
   const [studioFocus, setStudioFocus] = useState(false);
 
-  // 按下 enter 键盘
-  useKeyPress(['enter'], event => {
-    debugger;
+  // 定义键盘事件
+  useKeyPress(['enter', 'tab', 'delete'], event => {
     if (studioFocus && graph) {
       console.log(event);
-
+      const { keyCode } = event;
       const selectedItems = graph.get('selectedItems');
       if (isArrayAndNotEmpty(selectedItems)) {
-        const currentNode = graph.findById(selectedItems[0]);
-        currentNode.children = [
-          {
-            id: '3308bab7-6366-4674-a3ab-1949a6481e04',
-            nodeType: 'gd-node',
-            name: '招商****有限公司',
-            anchorPoints: [
-              [0, 0.5],
-              [1, 0.5],
-            ],
-            parentNsrsbh: '440300279343712',
-            data: {
-              nsrsbh: '440300279343712',
-              nsrmc: '深圳市招****控股有限公司',
-              djxh: '10114403000025577472',
-              tzfhhhrmc: '招商****有限公司',
-              tzbl: 0.9,
-              lrrq: '2018-05-28T03:23:45.000+0000',
-              hasChild: false,
-              gdSfsz: false,
-              btzfSfsz: true,
-              isCrossBorderConnectedTransaction: false,
-            },
-            tzbl: 0.9,
-            hasChild: false,
-            isCrossBorderConnectedTransaction: false,
-            isSz: false,
-          },
-          {
-            id: '2ea29a2e-af21-45b4-9772-03a8291ab2be',
-            nodeType: 'gd-node',
-            name: '招商局****份有限公司',
-            anchorPoints: [
-              [0, 0.5],
-              [1, 0.5],
-            ],
-            parentNsrsbh: '440300279343712',
-            data: {
-              nsrsbh: '440300279343712',
-              nsrmc: '深圳市招****股有限公司',
-              djxh: '10114403000025577472',
-              tzfhhhrmc: '招商局****份有限公司',
-              tzbl: 0.1,
-              lrrq: '2018-05-28T03:23:45.000+0000',
-              hasChild: false,
-              gdSfsz: false,
-              btzfSfsz: true,
-              isCrossBorderConnectedTransaction: false,
-            },
-            tzbl: 0.1,
-            hasChild: false,
-            isCrossBorderConnectedTransaction: false,
-            isSz: false,
-          },
-          {
-            id: '7b6f4e6e-e9c8-46f5-8cf0-370dad7a9760',
-            nodeType: 'tz-node',
-            name: '深圳市****资发展有限公司',
-            nsrsbh: '440300733041985',
-            anchorPoints: [
-              [0, 0.5],
-              [1, 0.5],
-            ],
-            parentNsrsbh: '440300279343712',
-            data: {
-              nsrsbh: '440300733041985',
-              nsrmc: '深圳市****资发展有限公司',
-              djxh: '10114403000026261504',
-              tzfhhhrmc: '深圳****资控股有限公司',
-              tzfhhrdjxh1: '10114403000025577000',
-              tzfhhrnsrsbh1: '440300279343712',
-              tzbl: 0.51,
-              lrrq: '2011-12-05T09:15:54.000+0000',
-              hasChild: true,
-              gdSfsz: true,
-              btzfSfsz: true,
-              gdSx: '企业',
-              isCrossBorderConnectedTransaction: true,
-            },
-            tzbl: 0.51,
-            hasChild: true,
-            isCrossBorderConnectedTransaction: true,
-            isSz: true,
-          },
-          {
-            id: 'a398b69e-362b-4a8a-b3b8-d0fb92214559',
-            nodeType: 'tz-node',
-            name: '深圳市楚****展有限公司',
-            nsrsbh: '440300733079158',
-            anchorPoints: [
-              [0, 0.5],
-              [1, 0.5],
-            ],
-            parentNsrsbh: '440300279343712',
-            data: {
-              nsrsbh: '440300733079158',
-              nsrmc: '深圳市楚****展有限公司',
-              djxh: '10114403000025610240',
-              tzfhhhrmc: '深圳市****资控股有限公司',
-              tzfhhrdjxh1: '10114403000025577000',
-              tzfhhrnsrsbh1: '440300279343712',
-              tzbl: 0.5,
-              lrrq: '2011-12-04T16:00:00.000+0000',
-              hasChild: true,
-              gdSfsz: true,
-              btzfSfsz: true,
-              gdSx: '企业',
-              isCrossBorderConnectedTransaction: true,
-            },
-            tzbl: 0.5,
-            hasChild: true,
-            isCrossBorderConnectedTransaction: true,
-            isSz: true,
-          },
-        ];
-        graph.changeData();
+        // 新节点的 id
+        const newNodeId = uuidv4();
+        switch (keyCode) {
+          case 9:
+            // 这是还需要判断是否是 node
+            const currentNodeData = graph.findDataById(selectedItems[0]);
+
+            if (!currentNodeData.children) {
+              currentNodeData.children = [];
+            }
+            currentNodeData.children.push({
+              id: newNodeId,
+              nodeType: 'gd-node',
+              name: '招商**ddd**有限公司',
+              anchorPoints,
+              nsrsbh: '9144030010001686XA',
+              parentId: selectedItems[0],
+            });
+            graph.changeData();
+            graph.setItemSelected(newNodeId);
+            break;
+          case 13:
+            const currentNode = graph.findById(selectedItems[0]);
+            const currentNodeModel = currentNode.getModel();
+            // 如果不是根节点
+            if (currentNodeModel.id !== '0') {
+              const parentNodeId = currentNodeModel.parentId;
+              const parentNodeData = graph.findDataById(parentNodeId);
+              parentNodeData.children.push({
+                id: newNodeId,
+                nodeType: 'gd-node',
+                name: '招商**ddd**有限公司',
+                anchorPoints,
+                nsrsbh: '9144030010001686XA',
+                parentId: parentNodeId,
+              });
+              graph.changeData();
+              graph.setItemSelected(newNodeId);
+            }
+            break;
+          case 46:
+            alert('删除节点');
+            break;
+          default:
+            alert('这是默认操作');
+        }
       }
     }
   });
@@ -205,18 +133,18 @@ export default () => {
           'clickSelected',
           // 'activate-relations',
           // 'brush-select',
-          {
-            type: 'drag-node',
-            enableDelegate: true,
-          },
+          // {
+          //   type: 'drag-node',
+          //   enableDelegate: true,
+          // },
         ],
         edit: ['click-select'],
       },
       defaultNode: {
-        shape: 'base-node',
+        type: 'base-node',
       },
       defaultEdge: {
-        shape: 'polyline',
+        type: 'polyline',
       },
       nodeStateStyles: {
         hover: {
@@ -242,16 +170,41 @@ export default () => {
         getHGap: d => {
           return 140;
         },
-        getSide: d => {
-          if (d.data.nodeType === 'gd-node') {
-            return 'left';
-          }
-          return 'right';
-        },
+        // getSide: d => {
+        //   if (d.data.nodeType === 'gd-node') {
+        //     return 'left';
+        //   }
+        //   return 'right';
+        // },
       },
     });
 
-    graph.data(data);
+    // 设置实例方法 清楚选中的节点或边
+    graph.clearSelected = () => {
+      let selected = graph.findAllByState('node', 'selected');
+      selected.forEach(node => {
+        graph.setItemState(node, 'selected', false);
+      });
+      selected = graph.findAllByState('edge', 'selected');
+      selected.forEach(edge => {
+        graph.setItemState(edge, 'selected', false);
+      });
+      // graph._clearSubProcessSelected();
+      graph.set('selectedItems', []);
+      graph.emit('afteritemselected', []);
+    };
+    // 设置选中某个节点或边
+    graph.setItemSelected = id => {
+      graph.clearSelected();
+      graph.setItemState(id, 'selected', true);
+      let selectedItems = graph.get('selectedItems');
+      if (!selectedItems) selectedItems = [];
+      selectedItems = [id];
+      graph.set('selectedItems', selectedItems);
+      graph.emit('afteritemselected', selectedItems);
+    };
+
+    graph.data(initialData);
     graph.render();
     graph.fitView(200);
     graph.setMode('default');
