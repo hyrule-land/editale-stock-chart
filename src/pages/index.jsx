@@ -6,6 +6,7 @@ import styles from './index.less';
 import initialData from './data';
 import { isArrayAndNotEmpty } from './util/uilt';
 import { v4 as uuidv4 } from 'uuid';
+import TzfModal from './modal/index';
 
 // shape
 import './shape/node';
@@ -26,6 +27,7 @@ export default () => {
   const [data, setData] = useState(initialData);
   // 当前是否在 canvas 工作区内
   const [studioFocus, setStudioFocus] = useState(false);
+  const [tzfModalVisible, setTzfModalVisible] = useState(false);
 
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
@@ -123,7 +125,7 @@ export default () => {
 
     graph = new G6.TreeGraph({
       container: canvasDom,
-      // plugins: [ grid ],
+      plugins: [grid],
       width: canvasDom.offsetWidth,
       height: canvasDom.offsetHeight,
       modes: {
@@ -207,6 +209,7 @@ export default () => {
     graph.data(initialData);
     graph.render();
     graph.fitView(200);
+    graph.zoomTo(1);
     graph.setMode('default');
 
     // 绑定事件
@@ -227,6 +230,12 @@ export default () => {
     }
   }
 
+  function onModalOk() {}
+
+  function onCancel() {
+    setTzfModalVisible(false);
+  }
+
   return (
     <div className={styles.wrapper}>
       <div
@@ -239,9 +248,18 @@ export default () => {
           <Button>重做</Button>
           <Button onClick={() => onModeChange('default')}>查看模式</Button>
           <Button onClick={() => onModeChange('edit')}>编辑模式</Button>
+
+          <Button onClick={() => setTzfModalVisible(true)}>添加投资方</Button>
+          <Button>添加对外投资方</Button>
         </div>
         <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
       </div>
+
+      <TzfModal
+        visible={tzfModalVisible}
+        onOk={onModalOk}
+        onCancel={onCancel}
+      />
     </div>
   );
 };
