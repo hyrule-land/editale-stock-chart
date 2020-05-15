@@ -10,9 +10,9 @@ import {
   Popover,
 } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import currencies from './currencies';
+import currencies from '../util/currencies';
 import styles from './index.less';
-import colorConfig from '../shape/color';
+import config from '../shape/config';
 
 const noop = () => {};
 
@@ -104,7 +104,7 @@ const TzfModal = props => {
       <div
         className={styles.stripe}
         style={{
-          background: colorConfig[modalType].stroke,
+          background: config[modalType].stroke,
         }}
       />
       <span>{modalType === 'tzf' ? '添加投资方' : '添加对外投资方'}</span>
@@ -132,8 +132,8 @@ const TzfModal = props => {
       <Button
         type="primary"
         style={{
-          background: colorConfig[modalType].stroke,
-          borderColor: colorConfig[modalType].stroke,
+          background: config[modalType].stroke,
+          borderColor: config[modalType].stroke,
         }}
         onClick={handleOk}
       >

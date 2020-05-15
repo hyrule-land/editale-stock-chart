@@ -1,5 +1,5 @@
 import G6 from '@antv/g6';
-import colorConfig from './color';
+import config from './config';
 
 G6.registerNode(
   'base-node',
@@ -19,11 +19,11 @@ G6.registerNode(
     draw(cfg, group) {
       const { name, id, nodeType } = cfg;
       let rectConfig = {
-        width: 180,
-        height: 30,
+        width: config[nodeType].width,
+        height: config[nodeType].height,
         radius: 15,
-        stroke: colorConfig[nodeType].stroke,
-        fill: colorConfig[nodeType].fill,
+        stroke: config[nodeType].stroke,
+        fill: config[nodeType].fill,
         lineWidth: 0.6,
         fontSize: 12,
         opacity: 1,
@@ -32,13 +32,13 @@ G6.registerNode(
       };
 
       // 当节点为根节点的时候
-      if (nodeType === 'root') {
-        rectConfig = {
-          ...rectConfig,
-          width: 250,
-          height: 50,
-        };
-      }
+      // if (nodeType === 'root') {
+      //   rectConfig = {
+      //     ...rectConfig,
+      //     width: 250,
+      //     height: 50,
+      //   };
+      // }
 
       const rect = group.addShape('rect', {
         attrs: {
@@ -55,7 +55,7 @@ G6.registerNode(
         y: 24,
         text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
         fontSize: 14,
-        fill: colorConfig[nodeType].textColor,
+        fill: config[nodeType].textColor,
         cursor: 'pointer',
         isNodeShape: true,
       };
@@ -63,6 +63,26 @@ G6.registerNode(
       group.addShape('text', {
         attrs: {
           ...textConfig,
+        },
+      });
+
+      // 添加左锚点
+      group.addShape('circle', {
+        attrs: {
+          x: 0,
+          y: config[nodeType].height / 2,
+          r: 3,
+          fill: config[nodeType].stroke,
+        },
+      });
+
+      // 添加左锚点
+      group.addShape('circle', {
+        attrs: {
+          x: config[nodeType].width,
+          y: config[nodeType].height / 2,
+          r: 3,
+          fill: config[nodeType].stroke,
         },
       });
 
@@ -102,12 +122,10 @@ G6.registerNode(
         }
       }
     },
-    getAnchorPoints() {
+    getAnchorPoints: function getAnchorPoints() {
       return [
-        [0.5, 0], // top
-        [1, 0.5], // right
-        [0.5, 1], // bottom
-        [0, 0.5], // left
+        [0, 0.5],
+        [1, 0.5],
       ];
     },
   },

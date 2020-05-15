@@ -1,5 +1,5 @@
 import G6 from '@antv/g6';
-import colorConfig from './color';
+import config from './config';
 
 G6.registerEdge('polyline', {
   itemType: 'edge',
@@ -9,11 +9,11 @@ G6.registerEdge('polyline', {
 
     const { investmentProportion, nodeType, name } = targetModel;
 
-    let strokeColor = colorConfig[nodeType].stroke;
+    let strokeColor = config[nodeType].stroke;
     if (nodeType === 'tzf') {
-      strokeColor = colorConfig[nodeType].stroke;
+      strokeColor = config[nodeType].stroke;
     } else if (nodeType === 'dwtzf') {
-      strokeColor = colorConfig[nodeType].stroke;
+      strokeColor = config[nodeType].stroke;
     }
 
     const { startPoint } = cfg;

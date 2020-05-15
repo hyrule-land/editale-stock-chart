@@ -16,6 +16,9 @@ import anchorPoints from './shape/anchorPoints';
 // behavior
 import './behavior/clickSelected';
 
+// custom component
+import NodeTooltip from './components/NodeTooltip';
+
 // util
 
 let graph = null;
@@ -24,12 +27,20 @@ const commands = ['enter', 'delete'];
 
 export default () => {
   const canvasRef = useRef(null);
+  const studioRef = useRef(null);
 
   const [data, setData] = useState(initialData);
   // 当前是否在 canvas 工作区内
   const [studioFocus, setStudioFocus] = useState(false);
   const [tzfModalVisible, setTzfModalVisible] = useState(false);
   const [tzfModalType, setTzfModalType] = useState('tzf');
+
+  // 节点的 tooltip
+  const [showNodeTooltip, setShowNodeTooltip] = useState(false);
+  const [nodeTooltipText, setNodeTooltipText] = useState('');
+  const [nodeTooltipX, setNodeToolTipX] = useState(0);
+  // 这个其实是是在 css 的 bottom，所以命名上其实是不太对的，懒得改了
+  const [nodeTooltipY, setNodeToolTipY] = useState(0);
 
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
@@ -90,31 +101,30 @@ export default () => {
 
   // 绑定事件
   function bindEvents() {
-    graph.on('node:mouseenter', function(evt) {
-      const node = evt.item;
-      const model = node.getModel();
-      graph.setItemState(node, 'hover', true);
-      graph.updateItem(node, {
-        labelCfg: {
-          style: {
-            fill: '#003a8c',
-          },
-        },
-      });
+    graph.on('node:mouseenter', evt => {
+      const { item } = evt;
+      const model = item.getModel();
+      const { x, y, name, tyshxydm, nodeType, location } = model;
+      const point = graph.getCanvasByPoint(x, y);
+
+      const tooltipDom = (
+        <div>
+          <div>节点类型: {nodeType}</div>
+          <div>名称: {name}</div>
+          <div>统一社会信用代码: {tyshxydm}</div>
+          <div>国家(地区): {location}</div>
+        </div>
+      );
+
+      setNodeTooltipText(tooltipDom);
+      setNodeToolTipX(point.x);
+      // 这个其实是是在 css 的 bottom，所以命名上其实是不太对的，懒得改了
+      setNodeToolTipY(studioRef.current.offsetHeight - point.y - 40);
+      setShowNodeTooltip(true);
     });
 
-    graph.on('node:mouseleave', function(evt) {
-      const node = evt.item;
-      const model = node.getModel();
-      graph.setItemState(node, 'hover', false);
-      graph.updateItem(node, {
-        label: model.oriLabel,
-        labelCfg: {
-          style: {
-            fill: '#555',
-          },
-        },
-      });
+    graph.on('node:mouseleave', evt => {
+      setShowNodeTooltip(false);
     });
   }
 
@@ -167,6 +177,7 @@ export default () => {
       },
       layout: {
         type: 'mindmap',
+        // type: 'dendrogram',
         direction: 'H',
         getHeight: () => 20,
         getWidth: () => 50,
@@ -174,12 +185,12 @@ export default () => {
         getHGap: d => {
           return 140;
         },
-        // getSide: d => {
-        //   if (d.data.nodeType === 'gd-node') {
-        //     return 'left';
-        //   }
-        //   return 'right';
-        // },
+        getSide: d => {
+          // if (d.data.nodeType === 'gd-node') {
+          //   return 'left';
+          // }
+          return 'right';
+        },
       },
     });
 
@@ -291,6 +302,7 @@ export default () => {
         className={styles.studio}
         onMouseEnter={onStudioMouseEnter}
         onMouseLeave={onStudioMouseLeave}
+        ref={studioRef}
       >
         <div className={styles.toolbar}>
           <Button>撤销</Button>
@@ -302,6 +314,14 @@ export default () => {
           <Button onClick={() => openModal('dwtzf')}>添加对外投资方</Button>
         </div>
         <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
+
+        {showNodeTooltip && (
+          <NodeTooltip
+            name={nodeTooltipText}
+            x={nodeTooltipX}
+            y={nodeTooltipY}
+          />
+        )}
       </div>
 
       <TzfModal

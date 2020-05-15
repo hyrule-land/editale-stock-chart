@@ -1,0 +1,22 @@
+.nodeTooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 7px 9px;
+  border-radius: 2px;
+  position: absolute;
+  z-index: 99;
+  font-size: 12px;
+  box-shadow: 0 0 8px #888;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 8px;
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 3px solid rgba(0, 0, 0, 0.8);
+  }
+}
