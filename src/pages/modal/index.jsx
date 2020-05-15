@@ -1,27 +1,53 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Button, Icon } from 'antd';
+import {
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Icon,
+  Popover,
+} from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import currencies from './currencies';
 import styles from './index.less';
+import colorConfig from '../shape/color';
 
 const noop = () => {};
 
 const { Option } = Select;
 
-const ConfigModal = props => {
-  const { visible = false, onCancel = noop, onOk = noop } = props;
+const TzfModal = props => {
+  const { visible = false, onCancel = noop, onOk = noop, type = 'tzf' } = props;
   const { getFieldDecorator } = props.form;
 
   const [currency, setCurrency] = useState(currencies[0]);
+  const [modalType, setModalType] = useState(type);
+
+  // 更新 modalType
+  useEffect(() => {
+    if (!visible) props.form.resetFields();
+    setModalType(type);
+  }, [type, visible]);
 
   function handleOk() {
-    onOk();
+    props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+        onOk({
+          ...values,
+          currency,
+          nodeType: modalType === 'tzf' ? 'tzf' : 'dwtzf',
+        });
+      }
+    });
   }
 
   function handleCancel() {
     onCancel();
   }
 
+  // 暂时不用
   function submit() {
     props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
@@ -65,15 +91,55 @@ const ConfigModal = props => {
     </Select>
   );
 
+  function swapModalType() {
+    if (modalType === 'tzf') {
+      setModalType('dwtzf');
+    } else {
+      setModalType('tzf');
+    }
+  }
+
   const titleDom = (
     <div className={styles.modalTitle}>
-      <div className={styles.stripe} />
-      添加投资方
-      <Icon
-        type="swap"
-        style={{ marginLeft: 8, fontSize: 14, cursor: 'pointer' }}
+      <div
+        className={styles.stripe}
+        style={{
+          background: colorConfig[modalType].stroke,
+        }}
       />
+      <span>{modalType === 'tzf' ? '添加投资方' : '添加对外投资方'}</span>
+      <Popover
+        content={`切换成${
+          modalType === 'tzf' ? '添加对外投资方' : '添加投资方'
+        }`}
+        placement="bottom"
+        title={null}
+      >
+        <Icon
+          type="swap"
+          style={{ marginLeft: 8, fontSize: '12px', cursor: 'pointer' }}
+          onClick={swapModalType}
+        />
+      </Popover>
     </div>
+  );
+
+  const footer = (
+    <>
+      <Button type="default" onClick={handleCancel}>
+        取消
+      </Button>
+      <Button
+        type="primary"
+        style={{
+          background: colorConfig[modalType].stroke,
+          borderColor: colorConfig[modalType].stroke,
+        }}
+        onClick={handleOk}
+      >
+        确定
+      </Button>
+    </>
   );
 
   return (
@@ -84,10 +150,11 @@ const ConfigModal = props => {
       onCancel={handleCancel}
       width={800}
       maskClosable={false}
+      footer={footer}
     >
       <Form {...formItemLayout}>
         <Form.Item label="投资方名称">
-          {getFieldDecorator('tzfmc', {
+          {getFieldDecorator('name', {
             rules: [
               {
                 max: 100,
@@ -167,10 +234,8 @@ const ConfigModal = props => {
           )}
         </Form.Item>
       </Form>
-
-      {/*<Button onClick={submit} type="success">提交</Button>*/}
     </Modal>
   );
 };
 
-export default Form.create()(ConfigModal);
+export default Form.create()(TzfModal);

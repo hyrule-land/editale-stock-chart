@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import G6 from '@antv/g6';
 import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
@@ -10,6 +10,7 @@ import TzfModal from './modal/index';
 
 // shape
 import './shape/node';
+import './shape/edge';
 import anchorPoints from './shape/anchorPoints';
 
 // behavior
@@ -28,6 +29,7 @@ export default () => {
   // 当前是否在 canvas 工作区内
   const [studioFocus, setStudioFocus] = useState(false);
   const [tzfModalVisible, setTzfModalVisible] = useState(false);
+  const [tzfModalType, setTzfModalType] = useState('tzf');
 
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
@@ -195,6 +197,7 @@ export default () => {
       graph.set('selectedItems', []);
       graph.emit('afteritemselected', []);
     };
+
     // 设置选中某个节点或边
     graph.setItemSelected = id => {
       graph.clearSelected();
@@ -205,6 +208,16 @@ export default () => {
       graph.set('selectedItems', selectedItems);
       graph.emit('afteritemselected', selectedItems);
     };
+
+    // 获取选中的节点
+    // graph.getSelectedNodes = () => {
+    //   return graph.findAllByState('node', 'selected');
+    // }
+    //
+    // // 获取选中的边
+    // graph.getSelectedEdges = () => {
+    //   return graph.findAllByState('edge', 'selected');
+    // }
 
     graph.data(initialData);
     graph.render();
@@ -230,10 +243,46 @@ export default () => {
     }
   }
 
-  function onModalOk() {}
+  function addChildNode(data) {
+    console.log(data);
+    const selectedItems = graph.get('selectedItems');
+    if (isArrayAndNotEmpty(selectedItems)) {
+      // 新节点的 id
+      const newNodeId = uuidv4();
+      const currentNodeData = graph.findDataById(selectedItems[0]);
+
+      if (!currentNodeData.children) {
+        currentNodeData.children = [];
+      }
+      currentNodeData.children.push({
+        id: newNodeId,
+        anchorPoints,
+        parentId: selectedItems[0],
+        ...data,
+      });
+      graph.changeData();
+      graph.setItemSelected(newNodeId);
+    }
+  }
+
+  function onModalOk(data) {
+    const selectedItems = graph.get('selectedItems');
+    addChildNode(data);
+    setTzfModalVisible(false);
+  }
 
   function onCancel() {
     setTzfModalVisible(false);
+  }
+
+  function openModal(type) {
+    const selectedItems = graph.get('selectedItems');
+    if (isArrayAndNotEmpty(selectedItems)) {
+      setTzfModalType(type);
+      setTzfModalVisible(true);
+    } else {
+      message.error('未选中节点');
+    }
   }
 
   return (
@@ -249,8 +298,8 @@ export default () => {
           <Button onClick={() => onModeChange('default')}>查看模式</Button>
           <Button onClick={() => onModeChange('edit')}>编辑模式</Button>
 
-          <Button onClick={() => setTzfModalVisible(true)}>添加投资方</Button>
-          <Button>添加对外投资方</Button>
+          <Button onClick={() => openModal('tzf')}>添加投资方</Button>
+          <Button onClick={() => openModal('dwtzf')}>添加对外投资方</Button>
         </div>
         <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
       </div>
@@ -259,6 +308,7 @@ export default () => {
         visible={tzfModalVisible}
         onOk={onModalOk}
         onCancel={onCancel}
+        type={tzfModalType}
       />
     </div>
   );

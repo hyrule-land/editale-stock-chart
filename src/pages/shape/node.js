@@ -1,4 +1,5 @@
 import G6 from '@antv/g6';
+import colorConfig from './color';
 
 G6.registerNode(
   'base-node',
@@ -16,19 +17,28 @@ G6.registerNode(
       },
     },
     draw(cfg, group) {
-      const { name, id } = cfg;
+      const { name, id, nodeType } = cfg;
       let rectConfig = {
         width: 180,
         height: 30,
         radius: 15,
-        stroke: '#000',
-        fill: '#fff',
+        stroke: colorConfig[nodeType].stroke,
+        fill: colorConfig[nodeType].fill,
         lineWidth: 0.6,
         fontSize: 12,
         opacity: 1,
         isNodeShape: true,
         cursor: 'pointer',
       };
+
+      // 当节点为根节点的时候
+      if (nodeType === 'root') {
+        rectConfig = {
+          ...rectConfig,
+          width: 250,
+          height: 50,
+        };
+      }
 
       const rect = group.addShape('rect', {
         attrs: {
@@ -45,7 +55,7 @@ G6.registerNode(
         y: 24,
         text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
         fontSize: 14,
-        fill: '#000',
+        fill: colorConfig[nodeType].textColor,
         cursor: 'pointer',
         isNodeShape: true,
       };
@@ -57,19 +67,19 @@ G6.registerNode(
       });
 
       // 显示 id 方便调试
-      group.addShape('text', {
-        attrs: {
-          textAlign: 'center',
-          textBaseline: 'bottom',
-          x: 85,
-          y: -10,
-          text: id,
-          fontSize: 14,
-          fill: '#000',
-          cursor: 'pointer',
-          isNodeShape: true,
-        },
-      });
+      // group.addShape('text', {
+      //   attrs: {
+      //     textAlign: 'center',
+      //     textBaseline: 'bottom',
+      //     x: 85,
+      //     y: -10,
+      //     text: id,
+      //     fontSize: 14,
+      //     fill: '#000',
+      //     cursor: 'pointer',
+      //     isNodeShape: true,
+      //   },
+      // });
 
       return rect;
     },
@@ -79,10 +89,16 @@ G6.registerNode(
         const rect = group.getChildByIndex(0);
         const text = group.getChildByIndex(1);
 
+        // if (value) {
+        //   rect.attr('fill', this.options.stateStyles.selected.fill);
+        // } else {
+        //   rect.attr('fill', this.options.style.fill);
+        // }
+
         if (value) {
-          rect.attr('fill', this.options.stateStyles.selected.fill);
+          rect.attr('lineWidth', 3);
         } else {
-          rect.attr('fill', this.options.style.fill);
+          rect.attr('lineWidth', 0.6);
         }
       }
     },
