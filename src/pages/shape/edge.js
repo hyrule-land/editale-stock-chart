@@ -7,13 +7,18 @@ G6.registerEdge('polyline', {
     const { target } = cfg;
     const targetModel = target.getModel();
 
-    const { investmentProportion, nodeType, name } = targetModel;
+    const {
+      investmentProportion,
+      investmentAmount,
+      nodeType,
+      name,
+    } = targetModel;
 
-    let strokeColor = config[nodeType].stroke;
+    let strokeColor = config.node[nodeType].stroke;
     if (nodeType === 'tzf') {
-      strokeColor = config[nodeType].stroke;
+      strokeColor = config.node[nodeType].stroke;
     } else if (nodeType === 'dwtzf') {
-      strokeColor = config[nodeType].stroke;
+      strokeColor = config.node[nodeType].stroke;
     }
 
     const { startPoint } = cfg;
@@ -98,8 +103,12 @@ G6.registerEdge('polyline', {
 
     group.addShape('text', {
       attrs: {
-        text: `投资比例: ${
-          investmentProportion ? investmentProportion.toFixed(2) : '--'
+        text: `金额：${
+          investmentAmount !== void 0 ? investmentAmount : '--'
+        }元，${
+          investmentProportion !== void 0
+            ? investmentProportion.toFixed(2)
+            : '--'
         }%`,
         x: textX,
         y: endPoint.y - labelTopOffset - 2,

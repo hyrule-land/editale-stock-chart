@@ -9,7 +9,7 @@ G6.registerBehavior('clickSelected', {
   getEvents() {
     return {
       'node:click': 'onClick',
-      'edge:click': 'onClick',
+      // 'edge:click': 'onClick',
       'edge:mouseover': 'onEdgeMouseOver',
       'edge:mouseleave': 'onEdgeMouseLeave',
       'canvas:click': 'onCanvasClick',

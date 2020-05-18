@@ -18,51 +18,32 @@ G6.registerNode(
     },
     draw(cfg, group) {
       const { name, id, nodeType } = cfg;
-      let rectConfig = {
-        width: config[nodeType].width,
-        height: config[nodeType].height,
-        radius: 15,
-        stroke: config[nodeType].stroke,
-        fill: config[nodeType].fill,
-        lineWidth: 0.6,
-        fontSize: 12,
-        opacity: 1,
-        isNodeShape: true,
-        cursor: 'pointer',
-      };
-
-      // 当节点为根节点的时候
-      // if (nodeType === 'root') {
-      //   rectConfig = {
-      //     ...rectConfig,
-      //     width: 250,
-      //     height: 50,
-      //   };
-      // }
 
       const rect = group.addShape('rect', {
         attrs: {
           x: 0,
           y: 0,
-          ...rectConfig,
+          radius: 15,
+          lineWidth: 0.6,
+          fontSize: 12,
+          opacity: 1,
+          isNodeShape: true,
+          cursor: 'pointer',
+          ...config.node[nodeType],
         },
       });
 
-      let textConfig = {
-        textAlign: 'center',
-        textBaseline: 'bottom',
-        x: 85,
-        y: 24,
-        text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
-        fontSize: 14,
-        fill: config[nodeType].textColor,
-        cursor: 'pointer',
-        isNodeShape: true,
-      };
-
       group.addShape('text', {
         attrs: {
-          ...textConfig,
+          textAlign: 'center',
+          textBaseline: 'bottom',
+          x: config.node[nodeType].width / 2,
+          y: config.node[nodeType].height / 2 + 8,
+          text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
+          fontSize: 14,
+          cursor: 'pointer',
+          isNodeShape: true,
+          ...config.text[nodeType],
         },
       });
 
@@ -70,19 +51,19 @@ G6.registerNode(
       group.addShape('circle', {
         attrs: {
           x: 0,
-          y: config[nodeType].height / 2,
+          y: config.node[nodeType].height / 2,
           r: 3,
-          fill: config[nodeType].stroke,
+          fill: config.node[nodeType].stroke,
         },
       });
 
       // 添加左锚点
       group.addShape('circle', {
         attrs: {
-          x: config[nodeType].width,
-          y: config[nodeType].height / 2,
+          x: config.node[nodeType].width,
+          y: config.node[nodeType].height / 2,
           r: 3,
-          fill: config[nodeType].stroke,
+          fill: config.node[nodeType].stroke,
         },
       });
 
@@ -108,12 +89,6 @@ G6.registerNode(
       if (name === 'selected') {
         const rect = group.getChildByIndex(0);
         const text = group.getChildByIndex(1);
-
-        // if (value) {
-        //   rect.attr('fill', this.options.stateStyles.selected.fill);
-        // } else {
-        //   rect.attr('fill', this.options.style.fill);
-        // }
 
         if (value) {
           rect.attr('lineWidth', 3);

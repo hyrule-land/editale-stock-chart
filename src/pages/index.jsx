@@ -3,10 +3,12 @@ import { Button, message } from 'antd';
 import G6 from '@antv/g6';
 import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
-import initialData from './data';
+import initialData from './data1';
 import { isArrayAndNotEmpty } from './util/uilt';
 import { v4 as uuidv4 } from 'uuid';
 import TzfModal from './modal/index';
+
+import _findLastIndex from 'lodash/findLastIndex';
 
 // shape
 import './shape/node';
@@ -53,22 +55,7 @@ export default () => {
         const newNodeId = uuidv4();
         switch (keyCode) {
           case 9:
-            // 这是还需要判断是否是 node
-            const currentNodeData = graph.findDataById(selectedItems[0]);
-
-            if (!currentNodeData.children) {
-              currentNodeData.children = [];
-            }
-            currentNodeData.children.push({
-              id: newNodeId,
-              nodeType: 'gd-node',
-              name: '招商**ddd**有限公司',
-              anchorPoints,
-              nsrsbh: '9144030010001686XA',
-              parentId: selectedItems[0],
-            });
-            graph.changeData();
-            graph.setItemSelected(newNodeId);
+            openModal('tzf');
             break;
           case 13:
             const currentNode = graph.findById(selectedItems[0]);
@@ -90,7 +77,7 @@ export default () => {
             }
             break;
           case 46:
-            alert('删除节点');
+            removeNode();
             break;
           default:
             alert('这是默认操作');
@@ -109,7 +96,7 @@ export default () => {
 
       const tooltipDom = (
         <div>
-          <div>节点类型: {nodeType}</div>
+          {/*<div>节点类型: {nodeType}</div>*/}
           <div>名称: {name}</div>
           <div>统一社会信用代码: {tyshxydm}</div>
           <div>国家(地区): {location}</div>
@@ -183,7 +170,10 @@ export default () => {
         getWidth: () => 50,
         getVGap: () => 12,
         getHGap: d => {
-          return 140;
+          if (d.nodeType && d.nodeType === 'root') {
+            return 200;
+          }
+          return 160;
         },
         getSide: d => {
           // if (d.data.nodeType === 'gd-node') {
@@ -265,12 +255,39 @@ export default () => {
       if (!currentNodeData.children) {
         currentNodeData.children = [];
       }
-      currentNodeData.children.push({
-        id: newNodeId,
-        anchorPoints,
-        parentId: selectedItems[0],
-        ...data,
-      });
+      // 如果子节点数组长度为空，或者节点类型是'对外投资方'，则添加在后面
+      if (currentNodeData.children.length === 0 || data.nodeType === 'dwtzf') {
+        currentNodeData.children.push({
+          id: newNodeId,
+          anchorPoints,
+          parentId: selectedItems[0],
+          ...data,
+        });
+      } else {
+        debugger;
+        const lastTzfNodeIndex = _findLastIndex(
+          currentNodeData.children,
+          item => {
+            return item.nodeType === 'tzf';
+          },
+        );
+
+        currentNodeData.children = currentNodeData.children
+          .slice(0, lastTzfNodeIndex + 1)
+          .concat({
+            id: newNodeId,
+            anchorPoints,
+            parentId: selectedItems[0],
+            ...data,
+          })
+          .concat(
+            currentNodeData.children.slice(
+              lastTzfNodeIndex + 1,
+              currentNodeData.children.length,
+            ),
+          );
+      }
+
       graph.changeData();
       graph.setItemSelected(newNodeId);
     }
@@ -296,6 +313,43 @@ export default () => {
     }
   }
 
+  function removeNode() {
+    const selectedItems = graph.get('selectedItems');
+    const selectedNodeId = selectedItems[0];
+    let targetNodeId = -999;
+    if (isArrayAndNotEmpty(selectedItems)) {
+      const targetNode = graph.findById(selectedNodeId);
+
+      targetNode.getEdges().forEach(edge => {
+        if (edge.getTarget().getModel().id === selectedNodeId) {
+          targetNodeId = edge.getPrePoint().id;
+          return;
+        }
+      });
+
+      if (targetNodeId !== -999) {
+        const targetNodeData = graph.findDataById(targetNodeId);
+        if (!targetNodeData.children) {
+          targetNodeData.children = [];
+        }
+        targetNodeData.children = targetNodeData.children.filter(item => {
+          return item.id !== selectedItems[0];
+        });
+        graph.changeData();
+        graph.clearSelected();
+      }
+    } else {
+      message.error('未选中节点');
+    }
+  }
+
+  function save() {
+    if (graph) {
+      const outputData = graph.save();
+      debugger;
+    }
+  }
+
   return (
     <div className={styles.wrapper}>
       <div
@@ -305,13 +359,16 @@ export default () => {
         ref={studioRef}
       >
         <div className={styles.toolbar}>
-          <Button>撤销</Button>
+          {/*<Button>撤销</Button>
           <Button>重做</Button>
           <Button onClick={() => onModeChange('default')}>查看模式</Button>
-          <Button onClick={() => onModeChange('edit')}>编辑模式</Button>
+          <Button onClick={() => onModeChange('edit')}>编辑模式</Button>*/}
 
           <Button onClick={() => openModal('tzf')}>添加投资方</Button>
           <Button onClick={() => openModal('dwtzf')}>添加对外投资方</Button>
+
+          <Button onClick={removeNode}>删除</Button>
+          <Button onClick={save}>保存</Button>
         </div>
         <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
 

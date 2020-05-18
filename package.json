@@ -26,6 +26,7 @@
     "@umijs/test": "^3.1.2",
     "antd": "3.19.1",
     "lint-staged": "^10.0.7",
+    "lodash": "^4.17.15",
     "normalize.css": "^8.0.1",
     "prettier": "^1.19.1",
     "puppeteer": "^3.0.2",

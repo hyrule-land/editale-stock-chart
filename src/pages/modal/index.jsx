@@ -23,6 +23,8 @@ const TzfModal = props => {
   const { getFieldDecorator } = props.form;
 
   const [currency, setCurrency] = useState(currencies[0]);
+  const [monetaryUnit, setMonetaryUnit] = useState('万元');
+
   const [modalType, setModalType] = useState(type);
 
   // 更新 modalType
@@ -37,6 +39,7 @@ const TzfModal = props => {
         onOk({
           ...values,
           currency,
+          monetaryUnit,
           nodeType: modalType === 'tzf' ? 'tzf' : 'dwtzf',
         });
       }
@@ -45,18 +48,6 @@ const TzfModal = props => {
 
   function handleCancel() {
     onCancel();
-  }
-
-  // 暂时不用
-  function submit() {
-    props.form.validateFieldsAndScroll((err, values) => {
-      if (!err) {
-        console.log({
-          ...values,
-          currency,
-        });
-      }
-    });
   }
 
   const formItemLayout = {
@@ -74,11 +65,14 @@ const TzfModal = props => {
     setCurrency(val);
   }
 
-  // uuidv4
-  const selectAfter = (
+  function onMonetaryUnitChange(val) {
+    setMonetaryUnit(val);
+  }
+
+  const selectBefore = (
     <Select
       defaultValue={currencies[0]}
-      style={{ width: 130 }}
+      style={{ width: 118 }}
       onChange={onCurrencyChange}
     >
       {currencies.map(item => {
@@ -88,6 +82,17 @@ const TzfModal = props => {
           </Option>
         );
       })}
+    </Select>
+  );
+
+  const selectAfter = (
+    <Select
+      defaultValue="万元"
+      // style={{ width: 130 }}
+      onChange={onMonetaryUnitChange}
+    >
+      <Option value="万元">万元</Option>
+      <Option value="元">元</Option>
     </Select>
   );
 
@@ -104,7 +109,7 @@ const TzfModal = props => {
       <div
         className={styles.stripe}
         style={{
-          background: config[modalType].stroke,
+          background: config.node[modalType].stroke,
         }}
       />
       <span>{modalType === 'tzf' ? '添加投资方' : '添加对外投资方'}</span>
@@ -132,8 +137,8 @@ const TzfModal = props => {
       <Button
         type="primary"
         style={{
-          background: config[modalType].stroke,
-          borderColor: config[modalType].stroke,
+          background: config.node[modalType].stroke,
+          borderColor: config.node[modalType].stroke,
         }}
         onClick={handleOk}
       >
@@ -211,7 +216,13 @@ const TzfModal = props => {
                 message: '请输入投资金额',
               },
             ],
-          })(<Input type="number" addonAfter={selectAfter} />)}
+          })(
+            <Input
+              type="number"
+              addonBefore={selectBefore}
+              addonAfter={selectAfter}
+            />,
+          )}
         </Form.Item>
 
         <Form.Item label="投资比例">
