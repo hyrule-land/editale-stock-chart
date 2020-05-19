@@ -96,7 +96,7 @@ G6.registerEdge('polyline', {
     // const labelLeftOffset = 8;
     const labelTopOffset = 8;
 
-    let textX = endPoint.x - 120;
+    let textX = endPoint.x - 150;
     if (endPoint.x - startPoint.x < 0) {
       textX = endPoint.x + 40;
     }

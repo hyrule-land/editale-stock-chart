@@ -13,25 +13,63 @@ import { v4 as uuidv4 } from 'uuid';
 import currencies from '../util/currencies';
 import styles from './index.less';
 import config from '../shape/config';
+import _isEmpty from 'lodash/isEmpty';
+import _get from 'lodash/get';
 
 const noop = () => {};
 
 const { Option } = Select;
 
 const TzfModal = props => {
-  const { visible = false, onCancel = noop, onOk = noop, type = 'tzf' } = props;
+  const {
+    visible = false,
+    onCancel = noop,
+    onOk = noop,
+    type = 'tzf',
+    dataSource = {},
+  } = props;
   const { getFieldDecorator } = props.form;
 
   const [currency, setCurrency] = useState(currencies[0]);
   const [monetaryUnit, setMonetaryUnit] = useState('万元');
 
   const [modalType, setModalType] = useState(type);
+  const [action, setAction] = useState('create');
 
   // 更新 modalType
   useEffect(() => {
-    if (!visible) props.form.resetFields();
-    setModalType(type);
-  }, [type, visible]);
+    // 判断 dataSource 是否为空对象，如果不是空对象，那执行的是更新操作
+    if (_isEmpty(dataSource)) {
+      setAction('create');
+      setMonetaryUnit('万元');
+      setCurrency(currencies[0]);
+      setModalType(type);
+    } else {
+      const {
+        tyshxydm,
+        monetaryUnit,
+        currency,
+        investmentAmount,
+        investmentProportion,
+        name,
+        location,
+        action,
+        id,
+      } = dataSource;
+
+      setAction('update');
+      props.form.setFieldsValue({
+        tyshxydm,
+        name,
+        location,
+        investmentAmount: parseFloat(investmentAmount),
+        investmentProportion: parseFloat(investmentProportion),
+      });
+      setModalType(type);
+      setMonetaryUnit(monetaryUnit);
+      setCurrency(currency);
+    }
+  }, [type, visible, dataSource]);
 
   function handleOk() {
     props.form.validateFieldsAndScroll((err, values) => {
@@ -41,6 +79,8 @@ const TzfModal = props => {
           currency,
           monetaryUnit,
           nodeType: modalType === 'tzf' ? 'tzf' : 'dwtzf',
+          // action,
+          id: _get(dataSource, 'id'),
         });
       }
     });
@@ -74,6 +114,7 @@ const TzfModal = props => {
       defaultValue={currencies[0]}
       style={{ width: 118 }}
       onChange={onCurrencyChange}
+      value={currency}
     >
       {currencies.map(item => {
         return (
@@ -90,6 +131,7 @@ const TzfModal = props => {
       defaultValue="万元"
       // style={{ width: 130 }}
       onChange={onMonetaryUnitChange}
+      value={monetaryUnit}
     >
       <Option value="万元">万元</Option>
       <Option value="元">元</Option>
@@ -112,7 +154,9 @@ const TzfModal = props => {
           background: config.node[modalType].stroke,
         }}
       />
-      <span>{modalType === 'tzf' ? '添加投资方' : '添加对外投资方'}</span>
+      <span>
+        {modalType === 'tzf' ? '添加投资方' : '添加对外投资方'} {action}
+      </span>
       <Popover
         content={`切换成${
           modalType === 'tzf' ? '添加对外投资方' : '添加投资方'
@@ -120,11 +164,13 @@ const TzfModal = props => {
         placement="bottom"
         title={null}
       >
-        <Icon
-          type="swap"
-          style={{ marginLeft: 8, fontSize: '12px', cursor: 'pointer' }}
-          onClick={swapModalType}
-        />
+        {action === 'create' ? (
+          <Icon
+            type="swap"
+            style={{ marginLeft: 8, fontSize: '12px', cursor: 'pointer' }}
+            onClick={swapModalType}
+          />
+        ) : null}
       </Popover>
     </div>
   );
@@ -156,6 +202,7 @@ const TzfModal = props => {
       width={800}
       maskClosable={false}
       footer={footer}
+      destroyOnClose={true}
     >
       <Form {...formItemLayout}>
         <Form.Item label="投资方名称">
@@ -205,7 +252,6 @@ const TzfModal = props => {
 
         <Form.Item label="投资金额">
           {getFieldDecorator('investmentAmount', {
-            // initialValue: 0,
             rules: [
               {
                 pattern: /^\d+(\.\d+)?$/,
@@ -227,7 +273,6 @@ const TzfModal = props => {
 
         <Form.Item label="投资比例">
           {getFieldDecorator('investmentProportion', {
-            // initialValue: 0,
             rules: [
               {
                 required: true,
@@ -240,7 +285,6 @@ const TzfModal = props => {
               max={100}
               formatter={value => `${value}%`}
               parser={value => value.replace('%', '')}
-              // onChange={onChange}
             />,
           )}
         </Form.Item>

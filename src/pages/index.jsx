@@ -3,12 +3,13 @@ import { Button, message } from 'antd';
 import G6 from '@antv/g6';
 import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
-import initialData from './data1';
+import initialData from './data';
 import { isArrayAndNotEmpty } from './util/uilt';
 import { v4 as uuidv4 } from 'uuid';
 import TzfModal from './modal/index';
 
 import _findLastIndex from 'lodash/findLastIndex';
+import _isEmpty from 'lodash/isEmpty';
 
 // shape
 import './shape/node';
@@ -44,6 +45,12 @@ export default () => {
   // 这个其实是是在 css 的 bottom，所以命名上其实是不太对的，懒得改了
   const [nodeTooltipY, setNodeToolTipY] = useState(0);
 
+  // 新增节点跟当前节点的关系 兄弟：brother，子节点：child
+  const [newNodeRelation, setNewNodeRelation] = useState('child');
+
+  //
+  const [modalDataSource, setModalDataSource] = useState({});
+
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
     if (studioFocus && graph) {
@@ -55,32 +62,25 @@ export default () => {
         const newNodeId = uuidv4();
         switch (keyCode) {
           case 9:
+            setNewNodeRelation('child');
             openModal('tzf');
             break;
           case 13:
-            const currentNode = graph.findById(selectedItems[0]);
-            const currentNodeModel = currentNode.getModel();
-            // 如果不是根节点
-            if (currentNodeModel.id !== '0') {
-              const parentNodeId = currentNodeModel.parentId;
-              const parentNodeData = graph.findDataById(parentNodeId);
-              parentNodeData.children.push({
-                id: newNodeId,
-                nodeType: 'gd-node',
-                name: '招商**ddd**有限公司',
-                anchorPoints,
-                nsrsbh: '9144030010001686XA',
-                parentId: parentNodeId,
-              });
-              graph.changeData();
-              graph.setItemSelected(newNodeId);
+            const currentNodeData = graph.findDataById(selectedItems[0]);
+
+            // 如果当前选中的节点不是根节点，才可以进行操作
+            if (currentNodeData.id === '0' || currentNodeData.id === 0) {
+              message.warning('根节点不允许添加同级节点');
+            } else {
+              setNewNodeRelation('brother');
+              openModal('tzf');
             }
             break;
           case 46:
             removeNode();
             break;
           default:
-            alert('这是默认操作');
+            message.info('这是默认操作');
         }
       }
     }
@@ -112,6 +112,23 @@ export default () => {
 
     graph.on('node:mouseleave', evt => {
       setShowNodeTooltip(false);
+    });
+
+    graph.on('node:dblclick', evt => {
+      const { item } = evt;
+      const model = item.getModel();
+      debugger;
+      if (model.id === 0 || model.id === '0') {
+        message.warning('当前企业不允许修改');
+      } else {
+        const { nodeType } = model;
+        setModalDataSource({
+          ...model,
+          action: 'update',
+        });
+        setTzfModalType(nodeType);
+        setTzfModalVisible(true);
+      }
     });
   }
 
@@ -244,46 +261,59 @@ export default () => {
     }
   }
 
-  function addChildNode(data) {
+  function addNode(data) {
+    debugger;
     console.log(data);
     const selectedItems = graph.get('selectedItems');
     if (isArrayAndNotEmpty(selectedItems)) {
       // 新节点的 id
       const newNodeId = uuidv4();
-      const currentNodeData = graph.findDataById(selectedItems[0]);
 
-      if (!currentNodeData.children) {
-        currentNodeData.children = [];
+      let targetNodeData = graph.findDataById(selectedItems[0]);
+      let parentId = selectedItems[0];
+
+      // 当添加的是兄弟节点的时候，那么需要判断当前选中的不是根节点
+      if (newNodeRelation === 'brother') {
+        parentId = targetNodeData.parentId;
+        targetNodeData = graph.findDataById(targetNodeData.parentId);
+        // 如果当前选中的节点是 “根节点”
+        if (parentId === '-1' || parentId === -1) {
+          return;
+        }
+      }
+
+      if (!targetNodeData.children) {
+        targetNodeData.children = [];
       }
       // 如果子节点数组长度为空，或者节点类型是'对外投资方'，则添加在后面
-      if (currentNodeData.children.length === 0 || data.nodeType === 'dwtzf') {
-        currentNodeData.children.push({
+      if (targetNodeData.children.length === 0 || data.nodeType === 'dwtzf') {
+        targetNodeData.children.push({
+          ...data,
           id: newNodeId,
           anchorPoints,
-          parentId: selectedItems[0],
-          ...data,
+          parentId,
         });
       } else {
-        debugger;
+        // 找到最后一个 “投资方” 的节点
         const lastTzfNodeIndex = _findLastIndex(
-          currentNodeData.children,
+          targetNodeData.children,
           item => {
             return item.nodeType === 'tzf';
           },
         );
 
-        currentNodeData.children = currentNodeData.children
+        targetNodeData.children = targetNodeData.children
           .slice(0, lastTzfNodeIndex + 1)
           .concat({
+            ...data,
             id: newNodeId,
             anchorPoints,
-            parentId: selectedItems[0],
-            ...data,
+            parentId,
           })
           .concat(
-            currentNodeData.children.slice(
+            targetNodeData.children.slice(
               lastTzfNodeIndex + 1,
-              currentNodeData.children.length,
+              targetNodeData.children.length,
             ),
           );
       }
@@ -293,9 +323,43 @@ export default () => {
     }
   }
 
+  function updateNode(data) {
+    debugger;
+    // const { id } = data;
+    // let targetNodeData = graph.findDataById(id);
+    // targetNodeData = {
+    //   ...targetNodeData,
+    //   ...data
+    // }
+    // graph.changeData();
+
+    const { id } = data;
+    let item = graph.findById(id);
+    const model = item.getModel();
+    debugger;
+    item.update({
+      ...model,
+      ...data,
+    });
+    item.refresh();
+
+    graph.refresh();
+    graph.paint();
+    graph.changeData();
+  }
+
   function onModalOk(data) {
+    console.log(data);
     const selectedItems = graph.get('selectedItems');
-    addChildNode(data);
+    const { id } = data;
+    debugger;
+    // 新增节点
+    if (_isEmpty(id)) {
+      addNode(data);
+    } else {
+      // 更新节点
+      updateNode(data);
+    }
     setTzfModalVisible(false);
   }
 
@@ -303,9 +367,11 @@ export default () => {
     setTzfModalVisible(false);
   }
 
+  // 新增节点的 弹窗
   function openModal(type) {
     const selectedItems = graph.get('selectedItems');
     if (isArrayAndNotEmpty(selectedItems)) {
+      setModalDataSource({});
       setTzfModalType(type);
       setTzfModalVisible(true);
     } else {
@@ -386,6 +452,7 @@ export default () => {
         onOk={onModalOk}
         onCancel={onCancel}
         type={tzfModalType}
+        dataSource={modalDataSource}
       />
     </div>
   );

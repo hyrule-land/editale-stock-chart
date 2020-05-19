@@ -7,5 +7,5 @@ export default {
   nodeType: 'root',
   tyshxydm: '9144030010001686XA',
   anchorPoints,
-  parentId: -1,
+  parentId: '-1',
 };
