@@ -51,6 +51,8 @@ export default () => {
   //
   const [modalDataSource, setModalDataSource] = useState({});
 
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
+
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
     if (studioFocus && graph) {
@@ -129,6 +131,13 @@ export default () => {
         setTzfModalVisible(true);
       }
     });
+
+    graph.on('afteritemselected', items => {
+      debugger;
+      if (isArrayAndNotEmpty(items)) {
+        setSelectedItemIds(items);
+      }
+    });
   }
 
   useEffect(() => {
@@ -200,7 +209,7 @@ export default () => {
       },
     });
 
-    // 设置实例方法 清楚选中的节点或边
+    // 设置实例方法 清楚选中的节点或边，其实应该 extend G6.TreeGraph 生成一个类的，放在类上，后续有时间再改
     graph.clearSelected = () => {
       let selected = graph.findAllByState('node', 'selected');
       selected.forEach(node => {
@@ -214,7 +223,7 @@ export default () => {
       graph.emit('afteritemselected', []);
     };
 
-    // 设置选中某个节点或边
+    // 设置选中某个节点或边，其实应该 extend G6.TreeGraph 生成一个类的，放在类上，后续有时间再改
     graph.setItemSelected = id => {
       graph.clearSelected();
       graph.setItemState(id, 'selected', true);
@@ -237,14 +246,17 @@ export default () => {
 
     graph.data(initialData);
     graph.render();
-    graph.fitView(200);
-    graph.zoomTo(1);
+    graph.fitView();
+    graph.zoomTo(1, {
+      x: canvasDom.offsetWidth / 2,
+      y: canvasDom.offsetHeight / 2,
+    });
     graph.setMode('default');
 
     // 绑定事件
     bindEvents();
 
-    // 选中第一个节点
+    // 选中根节点
     graph.setItemSelected('0');
   }, []);
 
