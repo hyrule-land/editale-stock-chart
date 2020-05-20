@@ -210,7 +210,6 @@ export default () => {
       selected.forEach(edge => {
         graph.setItemState(edge, 'selected', false);
       });
-      // graph._clearSubProcessSelected();
       graph.set('selectedItems', []);
       graph.emit('afteritemselected', []);
     };
@@ -244,6 +243,9 @@ export default () => {
 
     // 绑定事件
     bindEvents();
+
+    // 选中第一个节点
+    graph.setItemSelected('0');
   }, []);
 
   function onStudioMouseEnter() {

@@ -15,6 +15,7 @@ import styles from './index.less';
 import config from '../shape/config';
 import _isEmpty from 'lodash/isEmpty';
 import _get from 'lodash/get';
+import countries from './countries.js';
 
 const noop = () => {};
 
@@ -155,7 +156,8 @@ const TzfModal = props => {
         }}
       />
       <span>
-        {modalType === 'tzf' ? '添加投资方' : '添加对外投资方'} {action}
+        {action === 'create' ? '添加' : '修改'}
+        {modalType === 'tzf' ? '投资方' : '对外投资方'}
       </span>
       <Popover
         content={`切换成${
@@ -193,6 +195,8 @@ const TzfModal = props => {
     </>
   );
 
+  function onSearch() {}
+
   return (
     <Modal
       title={titleDom}
@@ -217,7 +221,7 @@ const TzfModal = props => {
                 message: '请输入投资方名称',
               },
             ],
-          })(<Input />)}
+          })(<Input allowClear />)}
         </Form.Item>
 
         <Form.Item label="统一社会信用代码">
@@ -236,7 +240,7 @@ const TzfModal = props => {
                 message: '请输入统一社会信用代码',
               },
             ],
-          })(<Input />)}
+          })(<Input allowClear />)}
         </Form.Item>
 
         <Form.Item label="国家(地区)">
@@ -247,7 +251,28 @@ const TzfModal = props => {
                 message: '请选择国家(地区)',
               },
             ],
-          })(<Input />)}
+          })(
+            <Select
+              showSearch
+              placeholder="选择国家(地区)"
+              optionFilterProp="children"
+              onSearch={onSearch}
+              allowClear
+              filterOption={(input, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {countries.map(item => {
+                return (
+                  <Option value={item.gjhdqjc} key={uuidv4()}>
+                    {item.gjhdqjc}
+                  </Option>
+                );
+              })}
+            </Select>,
+          )}
         </Form.Item>
 
         <Form.Item label="投资金额">
@@ -267,6 +292,7 @@ const TzfModal = props => {
               type="number"
               addonBefore={selectBefore}
               addonAfter={selectAfter}
+              allowClear
             />,
           )}
         </Form.Item>
@@ -285,6 +311,7 @@ const TzfModal = props => {
               max={100}
               formatter={value => `${value}%`}
               parser={value => value.replace('%', '')}
+              allowClear
             />,
           )}
         </Form.Item>
