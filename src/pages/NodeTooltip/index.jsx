@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from './NodeTooltip.less';
-const NodeToolTip = props => {
+import styles from './index.less';
+const Index = props => {
   const { name = '', x = 0, y = 0 } = props;
   return (
     <div
@@ -12,4 +12,4 @@ const NodeToolTip = props => {
   );
 };
 
-export default NodeToolTip;
+export default Index;

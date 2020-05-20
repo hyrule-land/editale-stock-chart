@@ -82,7 +82,15 @@ G6.registerNode(
       //   },
       // });
 
-      return rect;
+      return group;
+    },
+    update(cfg, item) {
+      const { name } = cfg;
+      const group = item.getContainer();
+      const text = group.getChildByIndex(1);
+      text.attr('text', name.length > 10 ? `${name.substr(0, 10)}...` : name);
+
+      return group;
     },
     setState(name, value, item) {
       const group = item.getContainer();

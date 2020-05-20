@@ -6,7 +6,7 @@ import styles from './index.less';
 import initialData from './data';
 import { isArrayAndNotEmpty } from './util/uilt';
 import { v4 as uuidv4 } from 'uuid';
-import TzfModal from './modal/index';
+import TzfModal from './ConfigModal/index';
 
 import _findLastIndex from 'lodash/findLastIndex';
 import _isEmpty from 'lodash/isEmpty';
@@ -20,7 +20,7 @@ import anchorPoints from './shape/anchorPoints';
 import './behavior/clickSelected';
 
 // custom component
-import NodeTooltip from './components/NodeTooltip';
+import NodeTooltip from './NodeTooltip';
 
 // util
 
@@ -117,7 +117,6 @@ export default () => {
     graph.on('node:dblclick', evt => {
       const { item } = evt;
       const model = item.getModel();
-      debugger;
       if (model.id === 0 || model.id === '0') {
         message.warning('当前企业不允许修改');
       } else {
@@ -262,7 +261,6 @@ export default () => {
   }
 
   function addNode(data) {
-    debugger;
     console.log(data);
     const selectedItems = graph.get('selectedItems');
     if (isArrayAndNotEmpty(selectedItems)) {
@@ -324,35 +322,24 @@ export default () => {
   }
 
   function updateNode(data) {
-    debugger;
-    // const { id } = data;
-    // let targetNodeData = graph.findDataById(id);
-    // targetNodeData = {
-    //   ...targetNodeData,
-    //   ...data
-    // }
-    // graph.changeData();
-
     const { id } = data;
     let item = graph.findById(id);
     const model = item.getModel();
-    debugger;
-    item.update({
+
+    graph.updateItem(item, {
       ...model,
       ...data,
     });
-    item.refresh();
 
-    graph.refresh();
-    graph.paint();
-    graph.changeData();
+    // graph.changeData();
+    // graph.refresh();
+    // graph.paint();
   }
 
   function onModalOk(data) {
     console.log(data);
     const selectedItems = graph.get('selectedItems');
     const { id } = data;
-    debugger;
     // 新增节点
     if (_isEmpty(id)) {
       addNode(data);
@@ -412,7 +399,6 @@ export default () => {
   function save() {
     if (graph) {
       const outputData = graph.save();
-      debugger;
     }
   }
 
