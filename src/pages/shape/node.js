@@ -1,5 +1,6 @@
 import G6 from '@antv/g6';
 import config from './config';
+import { getStringLength, ellipsisString } from '../util/uilt';
 
 G6.registerNode(
   'base-node',
@@ -39,7 +40,8 @@ G6.registerNode(
           textBaseline: 'bottom',
           x: config.node[nodeType].width / 2,
           y: config.node[nodeType].height / 2 + 8,
-          text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
+          // text: name.length > 10 ? `${name.substr(0, 10)}...` : name,
+          text: ellipsisString(name, 10),
           fontSize: 14,
           cursor: 'pointer',
           isNodeShape: true,
@@ -47,13 +49,21 @@ G6.registerNode(
         },
       });
 
+      const anchorAttrs = {
+        y: config.node[nodeType].height / 2,
+        r: 3,
+        fill: config.node[nodeType].stroke,
+      };
+
+      if (nodeType === 'root') {
+        anchorAttrs.y = config.node[nodeType].height / 2 - 10;
+      }
+
       // 添加左锚点
       group.addShape('circle', {
         attrs: {
           x: 0,
-          y: config.node[nodeType].height / 2,
-          r: 3,
-          fill: config.node[nodeType].stroke,
+          ...anchorAttrs,
         },
       });
 
@@ -61,9 +71,7 @@ G6.registerNode(
       group.addShape('circle', {
         attrs: {
           x: config.node[nodeType].width,
-          y: config.node[nodeType].height / 2,
-          r: 3,
-          fill: config.node[nodeType].stroke,
+          ...anchorAttrs,
         },
       });
 
@@ -88,7 +96,7 @@ G6.registerNode(
       const { name } = cfg;
       const group = item.getContainer();
       const text = group.getChildByIndex(1);
-      text.attr('text', name.length > 10 ? `${name.substr(0, 10)}...` : name);
+      text.attr('text', ellipsisString(name, 10));
 
       return group;
     },

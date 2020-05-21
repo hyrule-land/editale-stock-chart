@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, message } from 'antd';
+import { Button, message, Icon } from 'antd';
 import G6 from '@antv/g6';
 import { useKeyPress } from '@umijs/hooks';
 import styles from './index.less';
@@ -56,7 +56,6 @@ export default () => {
   // 定义键盘事件
   useKeyPress(['enter', 'tab', 'delete'], event => {
     if (studioFocus && graph) {
-      console.log(event);
       const { keyCode } = event;
       const selectedItems = graph.get('selectedItems');
       if (isArrayAndNotEmpty(selectedItems)) {
@@ -133,7 +132,6 @@ export default () => {
     });
 
     graph.on('afteritemselected', items => {
-      debugger;
       if (isArrayAndNotEmpty(items)) {
         setSelectedItemIds(items);
       }
@@ -275,7 +273,6 @@ export default () => {
   }
 
   function addNode(data) {
-    console.log(data);
     const selectedItems = graph.get('selectedItems');
     if (isArrayAndNotEmpty(selectedItems)) {
       // 新节点的 id
@@ -344,14 +341,9 @@ export default () => {
       ...model,
       ...data,
     });
-
-    // graph.changeData();
-    // graph.refresh();
-    // graph.paint();
   }
 
   function onModalOk(data) {
-    console.log(data);
     const selectedItems = graph.get('selectedItems');
     const { id } = data;
     // 新增节点
@@ -430,11 +422,24 @@ export default () => {
           <Button onClick={() => onModeChange('default')}>查看模式</Button>
           <Button onClick={() => onModeChange('edit')}>编辑模式</Button>*/}
 
-          <Button onClick={() => openModal('tzf')}>添加投资方</Button>
+          {/*<Button onClick={() => openModal('tzf')}>添加投资方</Button>
           <Button onClick={() => openModal('dwtzf')}>添加对外投资方</Button>
-
           <Button onClick={removeNode}>删除</Button>
-          <Button onClick={save}>保存</Button>
+          <Button onClick={save}>保存</Button>*/}
+
+          <span className={styles.command} onClick={() => openModal('tzf')}>
+            <Icon type="plus" /> 添加投资方
+          </span>
+          <span className={styles.command} onClick={() => openModal('dwtzf')}>
+            <Icon type="plus" /> 添加对外投资方
+          </span>
+
+          <span className={styles.command} onClick={removeNode}>
+            <Icon type="delete" /> 删除
+          </span>
+          <span className={styles.command} onClick={save}>
+            <Icon type="save" /> 保存
+          </span>
         </div>
         <div className={styles.chartCanvas} ref={canvasRef} id="chartCanvas" />
 

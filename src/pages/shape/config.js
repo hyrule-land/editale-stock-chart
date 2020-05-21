@@ -7,6 +7,7 @@ export default {
       stroke: '#ffab2a',
       width: 250,
       height: 50,
+      y: -10,
     },
     tzf: {
       fill: '#c6e5ff',
@@ -26,6 +27,7 @@ export default {
       textColor: '#000',
       fill: '#000',
       fontSize: 18,
+      y: 25,
     },
     tzf: {
       textColor: '#6092f9',
